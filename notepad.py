@@ -6,6 +6,12 @@ from PIL import Image
 cnxn=pyodbc.connect(r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
                      r'DBQ=C:\Users\Haider\Downloads\notes.accdb;')
 
+def delNote(data,i):
+  crsr=cnxn.cursor()
+  crsr.execute(f"Delete from Notes where username='{usrnm.get()}' and noteTitle='{data}'")
+  crsr.commit()        
+  ct.CTkLabel(notesFrame,text="Note deleted",width=380,height=60,font=('Times',20)).grid(row=i+1,columnspan=3,padx=10,pady=10)
+
 def savenewNotes(data,title):
   crsr=cnxn.cursor()
   crsr.execute(f"Insert into Notes([note],noteTitle,username) Values('{data}','{title}','{usrnm.get()}')")
@@ -49,18 +55,22 @@ def dispNote(title):
     ct.CTkButton(notesdisp,text='Save',width=180,font=('Times',20),command=lambda:saveexistingNotes(disp.get(1.0,"end"),title)).grid(row=4,column=1,padx=10,pady=10)
 
 def noteWin():
+    global notesFrame
     notesFrame=ct.CTkScrollableFrame(notes,width=730,height=400,orientation='vertical',scrollbar_button_color="#082621",scrollbar_button_hover_color="#14695a")
     notesFrame.place(x=0,y=0)
+    dlt=Image.open("dlt.png","r")
+    img2=ct.CTkImage(dlt,None,(30,30))
     ct.CTkButton(notesFrame,text='Add new note',font=('Times',20),command=addNote).grid(row=0,columnspan=2,padx=10,pady=10)
     crsr=cnxn.cursor()
     crsr.execute(f"Select noteTitle from Notes where username='{usrnm.get()}'")
     note=crsr.fetchall()
-    if note!=None or len(note)==0:
+    if note==None or len(note)==0:
+      ct.CTkLabel(notesFrame,text='No notes found',font=('Times',20)).grid(row=3,column=1,columnspan=2,padx=10,pady=10)
+    else:
       for i in range(len(note)):
          ct.CTkLabel(notesFrame,text=f'{i+1}.',font=('Times',20)).grid(row=i+1,column=0,padx=10,pady=10)
          ct.CTkButton(notesFrame,text=note[i][0],width=180,font=('Times',20),command=lambda pi=i:dispNote(note[pi][0])).grid(row=i+1,column=1,padx=10,pady=10)
-    else:
-      ct.CTkLabel(notesFrame,text='No notes found',font=('Times',20)).grid(row=1,columnspan=2,padx=10,pady=10)
+         ct.CTkButton(notesFrame,text='',image=img2,font=('Times',20),fg_color="#363636",hover=False,command=lambda pi=i:delNote(note[pi][0],pi)).grid(row=i+1,column=2,padx=10,pady=10)
 
  
 
@@ -114,10 +124,10 @@ def signup():
     username=ct.CTkEntry(signupFrame,font=('Arial',20),width=180)
     username.grid(row=4,column=1,padx=10,pady=10)
     global password
-    password=ct.CTkEntry(signupFrame,font=('Arial',20),placeholder_text='6 characters min.',width=180)
+    password=ct.CTkEntry(signupFrame,show="*",font=('Arial',20),placeholder_text='6 characters min.',width=180)
     password.grid(row=5,column=1,padx=10,pady=10)
     global cnfrm_password
-    cnfrm_password=ct.CTkEntry(signupFrame,font=('Arial',20),width=180)
+    cnfrm_password=ct.CTkEntry(signupFrame,show="*",font=('Arial',20),width=180)
     cnfrm_password.grid(row=6,column=1,padx=10,pady=10)
     ct.CTkButton(signupFrame,text='Signup',font=('Times',30),width=200,command=signupCheck).grid(row=7,columnspan=2,padx=10,pady=10)
     ct.CTkButton(signupFrame,text='',image=img,fg_color="#363636",hover=False,font=('Times',20),width=40,command=signupFrame.destroy).place(x=0,y=7)
@@ -145,7 +155,7 @@ ct.CTkLabel(loginFrame,text='Enter username',font=('Times',20),anchor='center').
 ct.CTkLabel(loginFrame,text='Password',font=('Times',20),anchor='center').grid(row=5,padx=10,pady=10)
 usrnm=ct.CTkEntry(loginFrame,font=('Arial',20),placeholder_text='eg: Admin',width=180)
 usrnm.grid(row=4,column=1,padx=10,pady=10)
-psswrd=ct.CTkEntry(loginFrame,font=('Arial',20),placeholder_text='xxxxxx',width=180)
+psswrd=ct.CTkEntry(loginFrame,show="*",font=('Arial',20),placeholder_text='xxxxxx',width=180)
 psswrd.grid(row=5,column=1,padx=10,pady=10)
 ct.CTkButton(loginFrame,text='Login',font=('Times',20),width=200,command=loginCheck).grid(row=6,columnspan=2,padx=10,pady=10)
 ct.CTkButton(loginFrame,text='''Don't have an account? Sign up.''',font=('Times',20,'underline'),width=180,command=signup).grid(row=7,columnspan=2,padx=10,pady=10)
