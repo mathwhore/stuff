@@ -1,4 +1,4 @@
-from tkinter import*
+from tkinter import Label, Frame
 import customtkinter as ct
 import pyodbc
 from PIL import Image
@@ -49,7 +49,7 @@ def dispNote(title):
     note=crsr.fetchone()
     ct.CTkButton(notesdisp,text='',image=img,fg_color="#363636",hover=False,font=('Times',20),width=40,command=notesdisp.destroy).place(x=0,y=7)
     ct.CTkLabel(notesdisp,text=title,font=('Arial',20,'bold','underline'),width=30).grid(column=1,row=0,padx=10,pady=10)
-    disp=ct.CTkTextbox(notesdisp,insertwidth=1,height=200,width=600,font=('Arial',20),undo=True)
+    disp=ct.CTkTextbox(notesdisp,insertwidth=1,height=350,width=750,font=('Arial',20),undo=True)
     disp.grid(columnspan=7,row=1,padx=10,pady=10)
     disp.insert(1.0,note[1])
     ct.CTkButton(notesdisp,text='Save',width=180,font=('Times',20),command=lambda:saveexistingNotes(disp.get(1.0,"end"),title)).grid(row=4,column=1,padx=10,pady=10)
@@ -85,7 +85,7 @@ def loginCheck():
         ct.CTkLabel(loginFrame,text='Incorrect username',font=('Times',20),width=30).grid(columnspan=2,row=8,pady=10)
       else:
         if psswrd.get()==failure[2]:
-         ct.CTkLabel(loginFrame,text='Login Successful!',font=('Times',20),width=50).grid(columnspan=2,row=8,pady=10)
+         Label(loginFrame,text='Login Successful!',font=('Times',15),width=20,fg='white',bg="#363636").grid(columnspan=2,row=8,pady=10)
          for widget in notes.winfo_children():
            widget.destroy()
          noteWin()
