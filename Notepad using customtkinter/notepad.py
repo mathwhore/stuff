@@ -1,4 +1,4 @@
-from tkinter import*
+from tkinter import Frame
 import customtkinter as ct
 import pyodbc
 from PIL import Image
