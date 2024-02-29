@@ -77,14 +77,14 @@ def noteWin():
 def loginCheck():
     crsr=cnxn.cursor()
     crsr.execute(f"Select * from Users where username='{usrnm.get()}'")
-    failure=crsr.fetchone()
+    check=crsr.fetchone()
     if len(usrnm.get())==0 or len(psswrd.get())==0:
       ct.CTkLabel(loginFrame,text='Entries left empty!',font=('Times',20),width=40).grid(columnspan=2,row=8,pady=10)
     else:
-      if len(failure)==0 or failure==None:
+      if len(check)==0 or check==None:
         ct.CTkLabel(loginFrame,text='Incorrect username',font=('Times',20),width=30).grid(columnspan=2,row=8,pady=10)
       else:
-        if psswrd.get()==failure[2]:
+        if psswrd.get()==check[2]:
          Label(loginFrame,text='Login Successful!',font=('Times',15),width=20,fg='white',bg="#363636").grid(columnspan=2,row=8,pady=10)
          for widget in notes.winfo_children():
            widget.destroy()
