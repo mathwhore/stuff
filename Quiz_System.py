@@ -14,10 +14,9 @@ conn_str = (
     r'DBQ=C:\Users\Haider\Downloads\Quiz_testing.accdb;'
     )
 
-# # THIS IS REGARDING THE PORTAL 
 
 # Triggering the single question data collector for the first time 
-def question_uplooader(x,data):
+def question_uploader(x,data):
     global max_no_of_questions
     max_no_of_questions = x
     single_Question(x, data)
@@ -35,7 +34,7 @@ def save_question_to_database(x,data):
         x = x-1
         cnxn = pyodbc.connect(conn_str)
         crsr = cnxn.cursor()
-        crsr.execute(f"INSERT INTO Questions(Question, OptionA, OptionB, OptionC, OptionD, Correct, Course, Active, IsPDFAvailable) VALUES ('{ques_var.get()}', '{opt_a_var.get()}', '{opt_b_var.get()}', '{opt_c_var.get()}', '{opt_d_var.get()}',{correct_var.get()},'{data[4]}', {active}, {'Yes' if pdf_var.get() == True else 'No'})")
+        crsr.execute(f"INSERT INTO Questions(Question, OptionA, OptionB, OptionC, OptionD, Correct, Course, Active, IsPDFAvailable,QuizNo) VALUES ('{ques_var.get()}', '{opt_a_var.get()}', '{opt_b_var.get()}', '{opt_c_var.get()}', '{opt_d_var.get()}',{correct_var.get()},'{data[4]}', {active}, {'Yes' if pdf_var.get() == True else 'No'}),{quiz_id_var.get()}")
         crsr.commit()
         single_Question(x, data)
      
@@ -92,19 +91,6 @@ def single_Question(x, data):
         go=Button(ques_frame,text="Next",font=("Verdana",15),width=20,fg="#A4CEFC",bg="#0F3375",command=lambda: save_question_to_database(x,data))
         go.grid(row=7,padx=10, pady=10,column=1)
 
-def n_quiz(data):
-        Data.destroy()
-        frm = Frame(right_frame,bg="#A4CEFC")
-        frm.place(x=20,y=20,height=500,width=800)
-        Label(frm,text="Question Maker",font=("Verdana",25,"bold"),anchor="center",width=20,bg="#A4CEFC",fg="#0F3375").grid(row=0,column=0,columnspan=2)
-        Label(frm,text="Enter the number of questions",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=1,column=0)
-        Label(frm,text="Enter QuizID:",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=2,column=0)
-        Entry(frm,textvariable=quiz_id_var,width=10,font=("Verdana",15)).grid(row=2,column=1,padx=10,pady=10)
-        Radiobutton(frm,text="Would you like to provide solution pdf to students?",font=("Verdana",15),value=True,variable=pdf_var,bg="#A4CEFC").grid(row=3,column=0)
-        no_ques=Entry(frm,textvariable=no_ques_var,width=10,font=("Verdana",15))
-        no_ques.grid(row=1,column=1,padx=10,pady=10)
-        Button(frm,text="Next",font=("Verdana",15),width=10,command=lambda:question_uplooader(no_ques_var.get(),data)).grid(row=3,column=1,padx=10,pady=10)
-
 def select_result(data):
     slct_frm=Frame(right_frame,bg="#A4CEFC")
     slct_frm.place(x=20,y=20,height=600,width=650)
@@ -117,38 +103,29 @@ def select_result(data):
 
     Button(slct_frm,anchor="center",width=20,text='Proceed',font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375",command=lambda:generate_result_pdf(data,quiz_chk_var.get())).grid(column=0,row=len(quizes)+1,padx=10,pady=10)
 
-
-
-# Entering the number of questions in the test 
-def teacher_window(data):
+def quiz_info(data):
+    info = Frame(right_frame,bg="#A4CEFC")
+    info.place(x=20,y=20,height=500,width=700)
     global pdf_var
     global no_ques_var
     no_ques_var=IntVar()
     pdf_var=BooleanVar(value=False)
+    Label(info,text="Question Maker",font=("Verdana",25,"bold"),anchor="center",width=20,bg="#A4CEFC",fg="#0F3375").grid(row=0,column=0,columnspan=2)
+    Label(info,text="Enter the number of questions",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=1,column=0)
+    Label(info,text="Enter QuizID:",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=2,column=0)
+    Radiobutton(info,text="Would you like to provide\nsolution pdf to students?",font=("Verdana",15),anchor="center",width=30,value=True,variable=pdf_var,bg="#A4CEFC",fg="#0F3375").grid(row=3,column=0)
+    no_ques=Entry(info,textvariable=no_ques_var,width=10,font=("Verdana",15))
+    no_ques.grid(row=1,column=1,padx=10,pady=10)
+    Entry(info,textvariable=quiz_id_var,width=10,font=("Verdana",15)).grid(row=2,column=1,padx=10,pady=10)
+    Button(info,text="Next",font=("Verdana",15),fg="#A4CEFC",bg="#0F3375",width=10,command=lambda:question_uploader(no_ques_var.get(),data)).grid(row=3,column=1,padx=10,pady=10)
+
+# Entering the number of questions in the test 
+def teacher_window(data):
     global Data
-    cnxn = pyodbc.connect(conn_str)
-    crsr = cnxn.cursor()
-    crsr.execute(f"select * from Questions where Course='{data[4]}'")
-    k=crsr.fetchone()
     Data = Frame(right_frame,bg="#A4CEFC")
     Data.place(x=20,y=20,height=500,width=700)
-    if k==None:
-        Label(Data,text="Question Maker",font=("Verdana",25,"bold"),anchor="center",width=20,bg="#A4CEFC",fg="#0F3375").grid(row=0,column=0,columnspan=2)
-        Label(Data,text="Enter the number of questions",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=1,column=0)
-        Label(Data,text="Enter QuizID:",font=("Verdana",15,"bold"),anchor="center",width=30,bg="#A4CEFC",fg="#0F3375").grid(row=2,column=0)
-
-        pdf_ask=Radiobutton(Data,text="Would you like to provide\nsolution pdf to students?",font=("Verdana",15),anchor="center",width=30,value=True,variable=pdf_var,bg="#A4CEFC",fg="#0F3375").grid(row=2,column=0)
-        no_ques=Entry(Data,textvariable=no_ques_var,width=10,font=("Verdana",15))
-        no_ques.grid(row=1,column=1,padx=10,pady=10)
-        Entry(Data,textvariable=quiz_id_var,width=10,font=("Verdana",15)).grid(row=2,column=1,padx=10,pady=10)
-
-        go=Button(Data,text="Next",font=("Verdana",15),fg="#A4CEFC",bg="#0F3375",width=10,command=lambda:question_uplooader(no_ques_var.get(),data)).grid(row=3,column=1,padx=10,pady=10)
-    else:
-        l=Label(Data,text="You have already created a quiz",font=("Verdana",15,"bold"),anchor="center",width=40,bg="#A4CEFC",fg="#0F3375").grid(row=0,column=0,padx=10,pady=10)
-        k=Button(Data,text="Generate student result",font=("Verdana",15),width=25,fg="#A4CEFC",bg="#0F3375", command=lambda:select_result(data)).grid(row=1,column=0,columnspan=2,padx=10,pady=10)   
-        Button(Data,text="Create another quiz",font=("Verdana",15),width=25,fg="#A4CEFC",bg="#0F3375", command=lambda:n_quiz(data)).grid(row=2,column=0,columnspan=2,padx=10,pady=10)   
-
-
+    k=Button(Data,text="Generate student result",font=("Verdana",15),width=25,fg="#A4CEFC",bg="#0F3375", command=lambda:select_result(data)).grid(row=2,column=0,columnspan=2,padx=10,pady=10)   
+    Button(Data,text="Create a quiz",font=("Verdana",15),width=25,fg="#A4CEFC",bg="#0F3375", command=lambda:quiz_info(data)).grid(row=1,column=0,columnspan=2,padx=10,pady=10)   
 
 
 # Check the courses 
@@ -166,7 +143,7 @@ def teacher_checker_window(data):
     crsr.execute(f"select * from users where isTeacher=True")
     teacher_data = crsr.fetchall()
     for i in range(len(teacher_data)):
-        course_button=Button(teacher_checker,fg="#A4CEFC",bg="#0F3375", text=teacher_data[i][4], command=lambda i=i:check_quiz_available(teacher_data[i]),width=25)
+        course_button=Button(teacher_checker,fg="#A4CEFC",bg="#0F3375", text=teacher_data[i][4], command=lambda i=i:check_quiz_available(teacher_data[i][4]),width=25)
         course_button.grid(column=0, row=i+1, padx=10, pady=10)
 
 
@@ -194,7 +171,7 @@ def quiz_checker(quiz_id):
             question_generator(quiz_ques,quiz_id)
     else:
         Label(quiz,anchor="center",width=40,text=f"You Have Already Attempted This Test\n You got {result_data[1]}/{result_data[4]}",font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375").grid(column=0, row=0, padx=10, pady=10)
-        Button(quiz,anchor="center",width=20,text=f"Check for another quiz",font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375",command=n_quiz_checker).grid(column=0, row=1, padx=10, pady=10)
+        Button(quiz,anchor="center",width=20,text=f"Check for another quiz",font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375",command=lambda:check_quiz_available(Course_name)).grid(column=0, row=1, padx=10, pady=10)
         
 # This is to generate the result 
 def check_ans(correct, checked):
@@ -205,24 +182,10 @@ def check_ans(correct, checked):
     single_question_frame.destroy()
     question_generator(quiz_ques,quiz_chk_var.get()) 
 
-def n_quiz_checker():
-    chk_frm=Frame(right_frame,bg="#A4CEFC")
-    chk_frm.place(x=20,y=20,height=600,width=650)
-    cnxn = pyodbc.connect(conn_str)
-    crsr1 = cnxn.cursor()
-    crsr1.execute(f"select Distinct QuizNo from Questions where Course='{Course_name}'")
-    quizes = crsr1.fetchall()
-    for i in range(len(quizes)):
-           Radiobutton(chk_frm,variable=quiz_chk_var,anchor="center",width=20,text=quizes[i][0],value=quizes[i][0],font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375").grid(column=0, row=i, padx=10, pady=10)   
-    else:
-        Label(chk_frm,anchor="center",width=20,text='No quizes found',font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375").grid(column=0,row=len(quizes)+1,padx=10,pady=10)
-    Button(chk_frm,anchor="center",width=20,text='Proceed',font=["comic sans", 20,"bold"],bg="#A4CEFC",fg="#0F3375",command=lambda:quiz_checker(quiz_chk_var.get())).grid(column=0,row=len(quizes)+1,padx=10,pady=10)
-
-
 # # Student Portal
-def check_quiz_available(teacher_data_single):
+def check_quiz_available(course_data):
     global Course_name 
-    Course_name = teacher_data_single[4]
+    Course_name = course_data
     global check_quiz
     check_quiz = Frame(right_frame,bg="#A4CEFC")
     check_quiz.place(x=20,y=20,height=600,width=650)
@@ -467,9 +430,9 @@ def login():
     global quiz_chk_var
     quiz_chk_var=StringVar()
     quiz_id_var=StringVar()
-    loginHeading = Label(Login, anchor="center",width=10,text="Login", font=["comic sans", 30,"bold"],bg="#A4CEFC").grid(column=0, row=0, columnspan=2, padx=10, pady=10)
-    login_username = Label(Login, anchor="center",width=13,text="Username", font=["comic sans", 15],bg="#A4CEFC").grid(column=0, row=1, padx=10, pady=10)
-    login_password = Label(Login, anchor="center",width=13,text="Password", font=["comic sans", 15],bg="#A4CEFC").grid(column=0, row=2, padx=10, pady=10)
+    loginHeading = Label(Login, anchor="center",width=10,text="Login", font=["comic sans", 30,"bold"],bg="#A4CEFC",fg="#0F3375").grid(column=0, row=0, columnspan=2, padx=10, pady=10)
+    login_username = Label(Login, anchor="center",width=13,text="Username", font=["comic sans", 15],bg="#A4CEFC",fg="#0F3375").grid(column=0, row=1, padx=10, pady=10)
+    login_password = Label(Login, anchor="center",width=13,text="Password", font=["comic sans", 15],bg="#A4CEFC",fg="#0F3375").grid(column=0, row=2, padx=10, pady=10)
     login_username_entry = Entry(Login, width=30, textvariable=login_username_var)
     login_username_entry.grid(column=1, row=1, padx=10, pady=10)
     login_password_entry = Entry(Login, width=30, textvariable=login_password_var)
@@ -530,20 +493,20 @@ def signup():
 # Login or Signup Window 
 auth = Tk()
 auth.title("Login or Signup")
-auth.geometry("1200x774")
+auth.geometry("1200x724")
 auth.config(bg="#0F3375")
 auth.resizable(False,False)
-heading_data = Label(auth,text="Quiz Management system", font=["Verdana", 30,"bold" ],bd=10,bg="#A4CEFC",highlightbackground="#0F3375", highlightthickness=5,fg="#0F3375").pack(side=TOP,fill=X)
+heading_data = Label(auth,text="Quiz Management System", font=["Verdana", 30,"bold" ],bd=10,bg="#A4CEFC",highlightbackground="#0F3375", highlightthickness=5,fg="#0F3375").pack(side=TOP,fill=X)
 left_frame = Frame(auth,bg="#A4CEFC",bd=10,highlightbackground="#0F3375",highlightthickness=5,highlightcolor="#0F3375")
-left_frame.place(x=0,y=74,width=400,height=700)
+left_frame.place(x=0,y=74,width=400,height=645)
 right_frame = Frame(auth,bg="#A4CEFC",bd=10,highlightbackground="#0F3375",highlightthickness=5,highlightcolor="#0F3375")
-right_frame.place(x=400,y=74,width=800,height=700)
+right_frame.place(x=400,y=74,width=800,height=645)
 devs=Label(right_frame,text="Developed By:\nFESE-019: Muzzammil Ahmed\nFESE-024: Kaif Nathani\nFESE-021: Haider Shahid",font=('verdana',22,"bold"),bg="#A4CEFC",fg="#0F3375")
 devs.place(x=160,y=200,height=250,width=500)
 heading = Label(left_frame,text="Login Or Signup", font=["Verdana", 20,"bold" ],bg="#A4CEFC",fg="#0F3375").place(x=65,y=20)
 loginbutton = Button(left_frame,text="Login", command= login, font=["Verdana", 15],fg="#A4CEFC",bg="#0F3375").place(x=95,y=80)
 signupbutton = Button(left_frame,text="Signup", command= signup, font=["Verdana", 15],fg="#A4CEFC",bg="#0F3375").place(x=190,y=80)
 Signup_login_frame = Frame(left_frame,bg="#A4CEFC")
-Signup_login_frame.place(x=0,y=150,height=500,width=350)
+Signup_login_frame.place(x=0,y=150,height=450,width=350)
 
 auth.mainloop()
